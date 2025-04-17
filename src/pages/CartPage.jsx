@@ -4,10 +4,13 @@ import { useSelector, useDispatch } from 'react-redux'
 import { removeFromCart, updateQuantity } from '../features/cart/cartSlice'
 import { toast } from 'react-hot-toast'
 import { FaTrash, FaPlus, FaMinus } from 'react-icons/fa'
+import {useNavigate} from 'react-router-dom'
+
 
 const CartPage = () => {
   const { items: cartItems, total } = useSelector(state => state.cart)
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleRemoveItem = (itemId, itemName) => {
     dispatch(removeFromCart(itemId))
@@ -92,22 +95,22 @@ const CartPage = () => {
                   <div className="pb-4">
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium">${total.toFixed(2)}</span>
+                      <span className="font-medium">₹{total.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Shipping</span>
-                      <span className="font-medium">$0.00</span>
+                      <span className="font-medium">₹0.00</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Tax</span>
-                      <span className="font-medium">$0.00</span>
+                      <span className="font-medium">₹0.00</span>
                     </div>
                   </div>
                   
                   <div className="py-4">
                     <div className="flex justify-between font-bold text-lg">
                       <span>Total</span>
-                      <span>${total.toFixed(2)}</span>
+                      <span>₹{total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

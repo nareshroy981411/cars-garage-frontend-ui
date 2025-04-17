@@ -30,19 +30,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserPlus } from 'react-icons/fa';
+// import logo from '../../assets/images/logo.png'
+import logo2 from '../../assets/images/logo2.jpg'
+// import logo3 from '../../assets/images/logo3.png'
 
 const PublicNavbar = () => {
   const navigate = useNavigate();
-
+ 
   return (
-    <nav className="bg-white shadow-md fixed w-full z-50">
+    <nav className="bg-[#030d17] shadow-md fixed w-full z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div 
           className="flex items-center cursor-pointer"
           onClick={() => navigate('/')}
         >
           <img 
-            src="/images/logo.png" 
+            src={logo2} 
             alt="Logo" 
             className="h-10 mr-2"
           />

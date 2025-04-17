@@ -1,56 +1,80 @@
-import axios from 'axios'
+// src/api/authApi.js
+import axios from 'axios';
 
-const API_URL = 'https://your-api-endpoint.com/api/auth'
+const BASE_URL = "http://localhost:8000";
 
-// Mock OTP generation and verification
-const generateOTP = () => Math.floor(1000 + Math.random() * 9000)
-
-export const registerUser = async (userData) => {
-  // In a real app, this would be an API call to send OTP to email
-  const otp = generateOTP()
-  localStorage.setItem('otp', otp.toString())
-  localStorage.setItem('tempUser', JSON.stringify(userData))
-  
-  // Mock API response
-  return { success: true, message: `OTP sent to ${userData.email}` }
-}
-
-export const verifyOTP = async (enteredOTP) => {
-  const savedOTP = localStorage.getItem('otp')
-  if (enteredOTP === savedOTP) {
-    const userData = JSON.parse(localStorage.getItem('tempUser'))
-    localStorage.removeItem('otp')
-    localStorage.removeItem('tempUser')
-    return { success: true, data: userData }
+export const registerUser = async (formData) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/login/register`, formData);
+    console.log("Register response:", response.data);
+    return response.data;
+    
+  } catch (error) {
+    console.error('Register error:', error);
+    return {
+      success: false,
+      message: error.response?.data?.detail ||
+        error.response?.data?.message ||
+        'Registration failed. Please try again.'
+    };
   }
-  return { success: false, message: 'Invalid OTP' }
-}
+};
 
-// import axios from 'axios'
+export const verifyOTP = async (email, otp) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/login/verify-otp`, {
+      email,
+      otp
+    });
+    return response.data;
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    return {
+      success: false,
+      message: error.response?.data?.detail ||
+        error.response?.data?.message ||
+        'OTP verification failed. Please try again.'
+    };
+  }
+};
 
-// const API_URL = 'https://your-api-endpoint.com/api/auth'
 
-// // Mock OTP generation and verification
-// const generateOTP = () => Math.floor(1000 + Math.random() * 9000)
+// // // src/api/authApi.js
+// import axios from 'axios';
+
+// const API_URL_Register = "http://localhost:8000/api/v1/auth/register";
+// const API_URL_verify_otp = "http://localhost:8000/api/v1/auth/verify-otp";
 
 // export const registerUser = async (userData) => {
-//   // In a real app, this would be an API call
-//   const otp = generateOTP()
-//   localStorage.setItem('otp', otp.toString())
-//   localStorage.setItem('tempUser', JSON.stringify(userData))
-  
-//   // Mock API response
-//   return { success: true, message: `OTP sent to ${userData.mobile}` }
-// }
-
-// export const verifyOTP = async (enteredOTP) => {
-//   const savedOTP = localStorage.getItem('otp')
-//   if (enteredOTP === savedOTP) {
-//     const userData = JSON.parse(localStorage.getItem('tempUser'))
-//     localStorage.removeItem('otp')
-//     localStorage.removeItem('tempUser')
-//     return { success: true, data: userData }
+//   console.log("Sending to backend:", userData); // Add this
+//   try {
+//     const response = await axios.post(API_URL_Register, userData);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Register API Error:', error.response?.data || error.message);
+//     return {
+//       success: false,
+//       message: error.response?.data?.message || "Failed to register user",
+//     };
 //   }
-//   return { success: false, message: 'Invalid OTP' }
-// }
+// };
+
+
+
+// export const verifyOTP = async (email, enteredOTP) => {
+//   try {
+//     const response = await axios.post(API_URL_verify_otp, {
+//       email,
+//       otp: enteredOTP,
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error('Verify OTP API Error:', error.response?.data || error.message);
+//     return {
+//       success: false,
+//       message: error.response?.data?.message || "Invalid OTP",
+//     };
+//   }
+// };
+
 

@@ -5,10 +5,12 @@ import { removeFromFavorites } from '../features/favorites/favoritesSlice'
 import { addToCart } from '../features/cart/cartSlice'
 import { toast } from 'react-hot-toast'
 import { FaHeart, FaShoppingCart, FaTrash } from 'react-icons/fa'
+import {useNavigate} from 'react-router-dom'
 
 const FavoritesPage = () => {
   const favorites = useSelector(state => state.favorites.items)
   const dispatch = useDispatch()
+    const navigate = useNavigate();
 
   const handleRemoveFavorite = (partId, partName) => {
     dispatch(removeFromFavorites(partId))
@@ -21,11 +23,11 @@ const FavoritesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 ">
       <PrivateNavbar />
       
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Your Favorite Parts</h1>
+      <div className="container mx-auto px-4 py-12 ">
+        {/* <h1 className="text-3xl font-bold text-gray-800 mb-8">Your Favorite Parts</h1> */}
         
         {favorites.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

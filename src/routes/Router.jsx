@@ -9,13 +9,16 @@ import CartPage from '../pages/CartPage'
 import ProfilePage from '../pages/ProfilePage'
 import ProtectedRoute from './ProtectedRoute'
 import PublicRoute from './PublicRoute'
+import Layout from '../components/navbar/Layout'
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: (
       <PublicRoute>
+        <Layout>
         <LandingPage />
+        </Layout>
       </PublicRoute>
     )
   },
@@ -23,7 +26,9 @@ export const router = createBrowserRouter([
     path: '/register',
     element: (
       <PublicRoute>
+        <Layout>
         <RegisterPage />
+        </Layout>
       </PublicRoute>
     )
   },
@@ -31,7 +36,9 @@ export const router = createBrowserRouter([
     path: '/brands',
     element: (
       <ProtectedRoute>
+        <Layout>
         <CarBrandsPage />
+        </Layout>
       </ProtectedRoute>
     )
   },
@@ -39,7 +46,9 @@ export const router = createBrowserRouter([
     path: '/brand/:brandId/parts',
     element: (
       <ProtectedRoute>
+        <Layout>
         <SparePartsPage />
+        </Layout>
       </ProtectedRoute>
     )
   },
@@ -47,7 +56,9 @@ export const router = createBrowserRouter([
     path: '/part/:partId',
     element: (
       <ProtectedRoute>
+        <Layout>
         <PartDetailsPage />
+        </Layout>
       </ProtectedRoute>
     )
   },
@@ -55,7 +66,9 @@ export const router = createBrowserRouter([
     path: '/favorites',
     element: (
       <ProtectedRoute>
+        <Layout>
         <FavoritesPage />
+        </Layout>
       </ProtectedRoute>
     )
   },
@@ -63,7 +76,9 @@ export const router = createBrowserRouter([
     path: '/cart',
     element: (
       <ProtectedRoute>
+        <Layout>
         <CartPage />
+        </Layout>
       </ProtectedRoute>
     )
   },
@@ -71,7 +86,9 @@ export const router = createBrowserRouter([
     path: '/profile',
     element: (
       <ProtectedRoute>
+        <Layout>
         <ProfilePage />
+        </Layout>
       </ProtectedRoute>
     )
   }

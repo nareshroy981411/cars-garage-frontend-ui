@@ -4,6 +4,7 @@ import { FaShoppingCart, FaHeart, FaUser, FaSignOutAlt } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import { logout } from '../../features/auth/authSlice'
 import { toast } from 'react-hot-toast'
+import logo2 from '../../assets/images/logo2.jpg'
 
 const PrivateNavbar = () => {
   const dispatch = useDispatch()
@@ -16,10 +17,10 @@ const PrivateNavbar = () => {
   }
 
   return (
-    <nav className="bg-white shadow-md fixed w-full z-10">
+    <nav className="bg-[#030d17] shadow-md fixed w-full z-10">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link to="/brands" className="flex items-center">
-          <img src="/images/logo.png" alt="Car-Decores" className="h-10 mr-2" />
+          <img src={logo2} alt="Car-Decores" className="h-10 mr-2" />
           <span className="text-xl font-bold text-blue-600">Car-Decores</span>
         </Link>
         

@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8000";
 
-// ✅ Fetch car brands
+// ✅ Fetch car brands and modles
 export const getCarBrands = async () => {
   try {
     const response = await axios.get(`${API_URL}/carmodels/search/`, {
@@ -15,7 +15,7 @@ export const getCarBrands = async () => {
   }
 };
 
-// ✅ Fetch spare parts based on model name
+// ✅ Fetch spare parts based on model name 
 export const getSpareParts = async (modelName) => {
   try {
     const response = await axios.get(`${API_URL}/spare-parts/`, {
@@ -32,14 +32,14 @@ export const getSpareParts = async (modelName) => {
 // ✅ Fetch part details by part ID
 export const getPartDetails = async (partId) => {
   try {
-    const response = await axios.get(`${API_URL}/spare-parts/${partId}/`);
+    const response = await axios.get(`${API_URL}/spare-parts/${partId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching part details:", error);
     throw error;
   }
 };
-
+// http://localhost:8000/spare-parts/{spare_id}
 
 
 // import axios from 'axios'
