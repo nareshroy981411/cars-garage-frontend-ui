@@ -43,12 +43,29 @@ const PartDetailsPage = () => {
     fetchPartDetails()
   }, [partId])
 
+  // const handleAddToCart = () => {
+  //   if (part) {
+  //     dispatch(addToCart({ ...part, quantity }))
+  //     toast.success(`${quantity} ${part.name} added to cart`)
+  //   }
+  // }
   const handleAddToCart = () => {
     if (part) {
-      dispatch(addToCart({ ...part, quantity }))
+      // dispatch(addToCart({
+      //   ...part,
+      //   stockQuantity: part.quantity,  // API quantity renamed
+      //   quantity      // User-selected cart quantity
+      // }))
+      dispatch(addToCart({
+        ...part,
+        quantity,            // User-selected
+        stockQuantity: part.quantity,  // From API
+        price: Number(part.price)
+      }))
       toast.success(`${quantity} ${part.name} added to cart`)
     }
   }
+  
 
   const handleToggleFavorite = () => {
     if (part) {
@@ -63,8 +80,8 @@ const PartDetailsPage = () => {
   }
 
   const handleQuantityChange = (value) => {
-    const newQuantity = quantity + value
-    if (newQuantity >= 1 && newQuantity <= (part?.stock || 1)) {
+    const newQuantity = part.quantity + value
+    if (newQuantity >= 1 && newQuantity <= (part.quantity  || 1)) {
       setQuantity(newQuantity)
     }
   }
@@ -134,7 +151,7 @@ const PartDetailsPage = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2"> 
-                    <strong>Availability:</strong> <span style={{ color: part.quantity > 0 ? 'green' : 'red' }}>{part.quantity > 0 ? 'In Stock' : 'Out of Stock'}</span>
+                    <strong>Availability:</strong> <span style={{ color: part.quantity > 0 ? 'green' : 'red' }}>{part.quantity > 0 ? ` ${part.quantity} In Stock` : 'Out of Stock'}</span>
                   </Typography>
                   <Typography variant="body2"><strong>Category:</strong> {part.category}</Typography>
                 </Grid>
@@ -153,27 +170,21 @@ const PartDetailsPage = () => {
                   <ButtonGroup size="small" variant="outlined">
                     <Button onClick={() => handleQuantityChange(-1)} disabled={quantity <= 1}>-</Button>
                     <Button disabled>{quantity}</Button>
-                    <Button onClick={() => handleQuantityChange(1)} disabled={quantity >= part.stock}>+</Button>
+                    <Button onClick={() => handleQuantityChange(1)} disabled={quantity >= part.quantity }>+</Button>
                   </ButtonGroup>
                 </Grid>
 
                 <Grid item xs={12} sm={5}>
                   <Button
                     onClick={handleAddToCart}
-                    disabled={part.stock <= 0}
+                    disabled={part.quantity  <= 0}
                     fullWidth
                     variant="contained"
-                    sx={{ bgcolor: part.stock > 0 ? '#facc15' : '#ccc', color: part.stock > 0 ? 'black' : 'gray', '&:hover': { bgcolor: '#fbbf24' } }}
+                    sx={{ bgcolor: part.quantity  > 0 ? '#facc15' : '#ccc', color: part.quantity  > 0 ? 'black' : 'gray', '&:hover': { bgcolor: '#fbbf24' } }}
                   >
                     Add to Cart
                   </Button>
                 </Grid>
-
-                {/* <Grid item xs={12} sm={3}>
-                  <IconButton onClick={handleToggleFavorite}>
-                    {isFavorite ? <FaHeart className="text-red-500" /> : <FaRegHeart className="text-gray-500" />}
-                  </IconButton>
-                </Grid> */}
               </Grid>
 
               <Box mt={4} display="flex" gap={2} alignItems="center" fontSize={14} color="gray">

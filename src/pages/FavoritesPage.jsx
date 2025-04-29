@@ -27,7 +27,7 @@ const FavoritesPage = () => {
       <PrivateNavbar />
       
       <div className="container mx-auto px-4 py-12 ">
-        {/* <h1 className="text-3xl font-bold text-gray-800 mb-8">Your Favorite Parts</h1> */}
+        <h1 className="text-3xl font-bold text-gray-800 mb-8"></h1>
         
         {favorites.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -53,16 +53,16 @@ const FavoritesPage = () => {
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">{part.description}</p>
                   
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-lg font-bold text-blue-600">${part.price.toFixed(2)}</span>
-                    <span className={`text-sm ${part.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {part.stock > 0 ? 'In stock' : 'Out of stock'}
+                    <span className="text-lg font-bold text-blue-600">₹{Number(part.price).toFixed(2)}</span>
+                    <span className={`text-sm ${part.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {part.quantity > 0 ? `${part.quantity} In stock` : 'Out of stock'}
                     </span>
                   </div>
                   
                   <button
                     onClick={() => handleAddToCart(part)}
-                    disabled={part.stock <= 0}
-                    className={`w-full flex items-center justify-center py-2 px-4 rounded-lg ${part.stock > 0 ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                    disabled={part.quantity <= 0}
+                    className={`w-full flex items-center justify-center py-2 px-4 rounded-lg ${part.quantity > 0 ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
                   >
                     <FaShoppingCart className="mr-2" />
                     Add to Cart

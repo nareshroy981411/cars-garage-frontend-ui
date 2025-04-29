@@ -15,6 +15,7 @@ const CarBrandsPage = () => {
     const fetchCarBrands = async () => {
       try {
         const data = await getCarBrands();
+        console.log(data)
         setBrands(data);
         setFilteredResults(data);
       } catch (error) {
@@ -92,14 +93,14 @@ const CarBrandsPage = () => {
     <div className="min-h-screen bg-gray-100">
       <PrivateNavbar />
       <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Search Car Brand / Model</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4"></h1>
 
         <input
           type="text"
           placeholder="Search brand or exact model name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
+          className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
         />
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

@@ -132,6 +132,8 @@ const RegisterPage = () => {
       try {
         const response = await verifyOTP(formData.email, otp);
         if (response.access_token) {
+          // Store token in localStorage
+          localStorage.setItem('authToken', response.access_token);
           dispatch(setCredentials({
             user: formData,
             token: response.access_token

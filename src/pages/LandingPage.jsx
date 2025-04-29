@@ -2,23 +2,6 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import PublicNavbar from '../components/navbar/PublicNavbar'
 import carVideo from '../assets/videos/landingVideo.mp4'
-// import HondaCivic from "../assets/images/hondaCivic.jpg"
-// import airFilter from '../assets/images/airFilter.jpg'
-// import BrakePads from '../assets/images/BrakePads.jpg'
-// import oilFilter from '../assets/images/oilFilter.jpg'
-// import fordMustang from '../assets/images/fordMustang.jpg'
-// import toyataCarmy from '../assets/images/toyataCarmy.jpg'
-// import engine from '../assets/images/engine.jpg'
-// import oil from '../assets/images/oil.jpg'
-// import tires from '../assets/images/tires.jpg'
-// import brakeroters from '../assets/images/brakeroters.jpg'
-// import b3 from '../assets/images/b3.png'
-// import audi from '../assets/images/audi.jpg'
-// import b4 from '../assets/images/b4.png'
-// import b5 from '../assets/images/b5.png'
-// import b6 from '../assets/images/b6.png'
-// import bmw from '../assets/images/bmw.jpg'
-// import mech from '../assets/images/mech.png'
 
 // Load all images from the folder
 const imageModules = import.meta.glob('../assets/images/*.{jpg,jpeg,png,gif}', { eager: true });

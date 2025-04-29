@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import PrivateNavbar from '../components/navbar/PrivateNavbar';
-import { getSpareParts } from '../api/carApi';
-import { toast } from 'react-hot-toast';
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../features/cart/cartSlice';
-import { addToFavorites, removeFromFavorites } from '../features/favorites/favoritesSlice';
-import { FaHeart, FaRegHeart, FaShoppingCart } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import PrivateNavbar from "../components/navbar/PrivateNavbar";
+import { getSpareParts, getCarBrands } from "../api/carApi";
+import { toast } from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../features/cart/cartSlice";
+import {
+  addToFavorites,
+  removeFromFavorites,
+} from "../features/favorites/favoritesSlice";
+import { FaHeart, FaRegHeart, FaShoppingCart } from "react-icons/fa";
 import {
   Grid,
   Box,
@@ -16,21 +19,74 @@ import {
   CardMedia,
   CardContent,
   CircularProgress,
-} from '@mui/material';
+} from "@mui/material";
 
 const SparePartsPage = () => {
   const { brandId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-
-  const modelName = location.state?.modelName;
-  const brandNameFromState = location.state?.brandName || 'Unknown Brand';
+  const [brandList, setBrandList] = useState([]);
+  // const modelName = location.state?.modelName;
+  const [modelName, setModelName] = useState(location.state?.modelName || "");
+  const brandNameFromState = location.state?.brandName || "Unknown Brand";
 
   const [parts, setParts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [brandName, setBrandName] = useState(brandNameFromState);
   const [hasError, setHasError] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredBrands = brandList.filter((brand) =>
+    brand.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = await getCarBrands();
+        const brands = [...new Set(response.map((item) => item.model_name))];
+        console.log("brands--", brands);
+        setBrandList(brands);
+      } catch (error) {
+        console.error("Failed to fetch brand names", error);
+      }
+    };
+
+    fetchBrands();
+  }, []);
+
+  const fetchSpareParts = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getSpareParts(modelName);
+
+      if (!data || !Array.isArray(data)) {
+        throw new Error("Invalid data format received");
+      }
+
+      const formattedParts = data.map((part) => ({
+        ...part,
+        id: part.id || Math.random().toString(36).substr(2, 9),
+        name: part.name || "Unnamed Part",
+        price: parseFloat(part.price) || 0,
+        quantity: parseInt(part.quantity) || 0,
+        image: part.img || "https://via.placeholder.com/300",
+        category: part.category || "uncategorized",
+        isFavorite: false,
+      }));
+
+      setParts(formattedParts);
+      setHasError(false);
+    } catch (error) {
+      console.error("Error fetching spare parts:", error);
+      toast.error("Failed to load spare parts");
+      setHasError(true);
+      setParts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!modelName) {
@@ -38,32 +94,31 @@ const SparePartsPage = () => {
       setHasError(true);
       return;
     }
-
-    const fetchSpareParts = async () => {
+    const fetchSpareParts = async (model) => {
       try {
         setIsLoading(true);
-        const data = await getSpareParts(modelName);
+        const data = await getSpareParts(model);
 
         if (!data || !Array.isArray(data)) {
-          throw new Error('Invalid data format received');
+          throw new Error("Invalid data format received");
         }
 
         const formattedParts = data.map((part) => ({
           ...part,
           id: part.id || Math.random().toString(36).substr(2, 9),
-          name: part.name || 'Unnamed Part',
+          name: part.name || "Unnamed Part",
           price: parseFloat(part.price) || 0,
           quantity: parseInt(part.quantity) || 0,
-          image: part.img || 'https://via.placeholder.com/300',
-          category: part.category || 'uncategorized',
+          image: part.img || "https://via.placeholder.com/300",
+          category: part.category || "uncategorized",
           isFavorite: false,
         }));
 
         setParts(formattedParts);
         setHasError(false);
       } catch (error) {
-        console.error('Error fetching spare parts:', error);
-        toast.error('Failed to load spare parts');
+        console.error("Error fetching spare parts:", error);
+        toast.error("Failed to load spare parts");
         setHasError(true);
         setParts([]);
       } finally {
@@ -71,7 +126,7 @@ const SparePartsPage = () => {
       }
     };
 
-    fetchSpareParts();
+    fetchSpareParts(modelName);
   }, [modelName]);
 
   const handleAddToCart = (part) => {
@@ -104,11 +159,10 @@ const SparePartsPage = () => {
 
   const handleViewDetails = (partId) => {
     navigate(`/part/${partId}`);
-    
   };
 
   const partsByCategory = parts.reduce((acc, part) => {
-    const category = part.category || 'other';
+    const category = part.category || "other";
     if (!acc[category]) {
       acc[category] = [];
     }
@@ -118,9 +172,16 @@ const SparePartsPage = () => {
 
   if (isLoading) {
     return (
-      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
         <PrivateNavbar />
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "80vh",
+          }}
+        >
           <CircularProgress />
         </Box>
       </Box>
@@ -129,9 +190,16 @@ const SparePartsPage = () => {
 
   if (hasError) {
     return (
-      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
         <PrivateNavbar />
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "80vh",
+          }}
+        >
           <Typography variant="h6" color="error">
             Failed to load spare parts. Please try again later.
           </Typography>
@@ -141,7 +209,7 @@ const SparePartsPage = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       <PrivateNavbar />
 
       <Box sx={{ p: { xs: 2, md: 4 } }}>
@@ -152,9 +220,9 @@ const SparePartsPage = () => {
           mt={2}
           textAlign="center"
           sx={{
-            overflowX: 'auto',
-            whiteSpace: 'nowrap',
-            flexWrap: 'nowrap',
+            overflowX: "auto",
+            whiteSpace: "nowrap",
+            flexWrap: "nowrap",
             pb: 1,
           }}
         >
@@ -166,190 +234,265 @@ const SparePartsPage = () => {
               sm={3}
               md={2}
               sx={{
-                fontSize: { xs: '10px', sm: '13px' },
+                fontSize: { xs: "10px", sm: "13px" },
                 flexShrink: 0,
-                textTransform: 'capitalize',
-                fontWeight: 'bold',
+                textTransform: "capitalize",
+                fontWeight: "bold",
               }}
             >
-              {category.replace(/_/g, ' ')}
+              {category.replace(/_/g, " ")}
             </Grid>
           ))}
         </Grid>
 
         {/* Main Content Area */}
-        <Grid container spacing={2} sx={{ pt: 3 }}>
+        <Box sx={{ display: "flex", pt: 3 }}>
           {/* Brands Sidebar */}
-          <Grid item xs={12} sm={3} md={2}>
-            <Box sx={{ p: 2, position: 'sticky', top: 20 }}>
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{
-                  fontWeight: 'bold',
-                  fontSize: { xs: '14px', sm: '16px' },
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                }}
-              >
-                BRANDS
-              </Typography>
+          <Box
+            sx={{
+              width: "250px",
+              minWidth: "200px",
+              maxWidth: "300px",
+              p: 2,
+              borderRight: "1px solid #e0e0e0",
+              position: "sticky",
+              top: 80,
+              height: "calc(100vh - 80px)",
+              overflowY: "auto",
+              bgcolor: "#fafafa",
+            }}
+          >
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{
+                fontWeight: "bold",
+                fontSize: "16px",
+                textTransform: "uppercase",
+              }}
+            >
+              Brands
+            </Typography>
 
-              <Typography variant="body1" sx={{ fontSize: '14px', textTransform: 'capitalize' }}>
-                {brandName.toLowerCase()}
-              </Typography>
+            {/* 🔍 Search Box */}
+            <input
+              type="text"
+              placeholder="Search brand/model..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+                marginBottom: "16px",
+                fontSize: "14px",
+              }}
+            />
+
+            {/* Filtered Brands */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {filteredBrands.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  No results found.
+                </Typography>
+              ) : (
+                filteredBrands.map((brand, index) => (
+                  <Box
+                    key={index}
+                    onClick={() => {
+                      setModelName(brand);
+                      setBrandName(brand);
+                    }}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      borderRadius: 1,
+                      textTransform: "capitalize",
+                      cursor: "pointer",
+                      backgroundColor:
+                        brand === brandName ? "primary.light" : "transparent",
+                      fontWeight: brand === brandName ? "bold" : "normal",
+                      "&:hover": {
+                        backgroundColor: "#f5f5f5",
+                      },
+                    }}
+                  >
+                    {brand}
+                  </Box>
+                ))
+              )}
             </Box>
-          </Grid>
+          </Box>
 
           {/* Products Grid */}
-          <Grid item xs={12} sm={9} md={10}>
+          <Box sx={{ flex: 1, p: 2 }}>
             <Typography
               variant="h4"
               gutterBottom
               sx={{
-                fontWeight: 'bold',
-                fontSize: { xs: '1.5rem', sm: '2rem' },
+                fontWeight: "bold",
+                fontSize: { xs: "1.5rem", sm: "2rem" },
                 mb: 3,
-                textTransform: 'capitalize',
+                textTransform: "capitalize",
               }}
             >
-              Spare parts for {brandName.toLowerCase()}
+              Spare parts for {brandName} {modelName}
             </Typography>
 
             {parts.length === 0 ? (
-              <Box sx={{ textAlign: 'center', py: 8 }}>
+              <Box sx={{ textAlign: "center", py: 8 }}>
                 <Typography variant="body1" color="text.secondary">
                   No spare parts available for this brand.
                 </Typography>
               </Box>
             ) : (
-              Object.entries(partsByCategory).map(([category, categoryParts]) => (
-                <Box key={category} sx={{ mb: 4 }}>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      mb: 2,
-                      textTransform: 'capitalize',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {category.replace(/_/g, ' ')}
-                  </Typography>
-                  <Grid container spacing={3}>
-                    {categoryParts.map((part) => (
-                      <Grid item xs={12} sm={6} md={4} lg={3} key={part.id}>
-                        <Card
-                          sx={{
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            transition: 'box-shadow 0.3s',
-                            '&:hover': {
-                              boxShadow: 6,
-                            },
-                          }}
-                        >
-                          <Box sx={{ position: 'relative' }}>
-                            <CardMedia
-                              component="img"
-                              height="200"
-                              image={part.image}
-                              alt={part.name}
-                              onClick={() => handleViewDetails(part.id)}
-                              sx={{
-                                cursor: 'pointer',
-                                objectFit: 'contain',
-                                p: 1,
-                              }}
-                            />
-                            <Button
-                              onClick={() => handleToggleFavorite(part)}
-                              sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: 8,
-                                minWidth: 'auto',
-                                p: 1,
-                                bgcolor: 'background.paper',
-                                borderRadius: '50%',
-                                boxShadow: 1,
-                              }}
-                              aria-label={part.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                            >
-                              {part.isFavorite ? (
-                                <FaHeart style={{ color: 'red', fontSize: '1rem' }} />
-                              ) : (
-                                <FaRegHeart style={{ fontSize: '1rem' }} />
-                              )}
-                            </Button>
-                          </Box>
-
-                          <CardContent sx={{ flexGrow: 1 }}>
-                            <Typography
-                              gutterBottom
-                              variant="h6"
-                              component="h3"
-                              onClick={() => handleViewDetails(part.id)}
-                              sx={{
-                                cursor: 'pointer',
-                                fontSize: '1rem',
-                                fontWeight: 'medium',
-                                '&:hover': {
-                                  color: 'primary.main',
-                                },
-                              }}
-                            >
-                              {part.name}
-                            </Typography>
-
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                              <Typography variant="h6" color="primary">
-                                ₹{part.price.toFixed(2)}
-                              </Typography>
-                              <Typography
-                                variant="body2"
+              Object.entries(partsByCategory).map(
+                ([category, categoryParts]) => (
+                  <Box key={category} sx={{ mb: 4 }}>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        mb: 2,
+                        textTransform: "capitalize",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {category.replace(/_/g, " ")}
+                    </Typography>
+                    <Grid container spacing={3}>
+                      {categoryParts.map((part) => (
+                        <Grid item xs={12} sm={6} md={4} lg={4} xl={3} key={part.id}>
+                          <Card
+                            sx={{
+                              height: "200px",
+                              width: "300px",
+                              display: "flex",
+                              flexDirection: "column",
+                              transition: "box-shadow 0.3s",
+                              "&:hover": {
+                                boxShadow: 6,
+                              },
+                            }}
+                          >
+                            <Box sx={{ position: "relative" }}>
+                              <CardMedia
+                                component="img"
+                                height="200"
+                                image={part.image}
+                                alt={part.name}
+                                onClick={() => handleViewDetails(part.id)}
                                 sx={{
-                                  color: part.quantity > 0 ? 'success.main' : 'error.main',
-                                  fontWeight: 'medium',
+                                  cursor: "pointer",
+                                  objectFit: "contain",
+                                  p: 1,
                                 }}
+                              />
+                              <Button
+                                onClick={() => handleToggleFavorite(part)}
+                                sx={{
+                                  position: "absolute",
+                                  top: 8,
+                                  right: 8,
+                                  minWidth: "auto",
+                                  p: 1,
+                                  bgcolor: "background.paper",
+                                  borderRadius: "50%",
+                                  boxShadow: 1,
+                                }}
+                                aria-label={
+                                  part.isFavorite
+                                    ? "Remove from favorites"
+                                    : "Add to favorites"
+                                }
                               >
-                                {part.quantity > 0 ? `${part.quantity} in stock` : 'Out of stock'}
-                              </Typography>
+                                {part.isFavorite ? (
+                                  <FaHeart
+                                    style={{ color: "red", fontSize: "1rem" }}
+                                  />
+                                ) : (
+                                  <FaRegHeart style={{ fontSize: "1rem" }} />
+                                )}
+                              </Button>
                             </Box>
 
-                            <Button
-                              fullWidth
-                              variant="contained"
-                              onClick={() => handleAddToCart(part)}
-                              disabled={part.quantity <= 0}
-                              startIcon={<FaShoppingCart />}
-                              sx={{
-                                py: 1,
-                                '&.Mui-disabled': {
-                                  bgcolor: 'action.disabledBackground',
-                                  color: 'text.disabled',
-                                },
-                              }}
-                            >
-                              Add to Cart
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              ))
+                            <CardContent sx={{ flexGrow: 1 }}>
+                              <Typography
+                                gutterBottom
+                                variant="h6"
+                                component="h3"
+                                onClick={() => handleViewDetails(part.id)}
+                                sx={{
+                                  cursor: "pointer",
+                                  fontSize: "1rem",
+                                  fontWeight: "medium",
+                                  "&:hover": {
+                                    color: "primary.main",
+                                  },
+                                }}
+                              >
+                                {part.name}
+                              </Typography>
+
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  mb: 2,
+                                }}
+                              >
+                                <Typography variant="h6" color="primary">
+                                  ₹{part.price.toFixed(2)}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color:
+                                      part.quantity > 0
+                                        ? "success.main"
+                                        : "error.main",
+                                    fontWeight: "medium",
+                                  }}
+                                >
+                                  {part.quantity > 0
+                                    ? `${part.quantity} in stock`
+                                    : "Out of stock"}
+                                </Typography>
+                              </Box>
+
+                              <Button
+                                fullWidth
+                                variant="contained"
+                                onClick={() => handleAddToCart(part)}
+                                disabled={part.quantity <= 0}
+                                startIcon={<FaShoppingCart />}
+                                sx={{
+                                  py: 1,
+                                  "&.Mui-disabled": {
+                                    bgcolor: "action.disabledBackground",
+                                    color: "text.disabled",
+                                  },
+                                }}
+                              >
+                                Add to Cart
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                )
+              )
             )}
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
 };
 
 export default SparePartsPage;
-
 
 // import React, { useState, useEffect } from 'react'
 // import { useParams, useNavigate } from 'react-router-dom'
@@ -361,7 +504,7 @@ export default SparePartsPage;
 // import { addToFavorites, removeFromFavorites } from '../features/favorites/favoritesSlice'
 // import { FaHeart, FaRegHeart, FaShoppingCart } from 'react-icons/fa'
 // import { useLocation } from 'react-router-dom';
- 
+
 // const SparePartsPage = () => {
 //   const { brandId } = useParams()
 //   const [parts, setParts] = useState([])
@@ -376,7 +519,7 @@ export default SparePartsPage;
 //     if (!modelName) return;
 //     const fetchSpareParts = async () => {
 //       try {
-//         const data = await getSpareParts(modelName) 
+//         const data = await getSpareParts(modelName)
 //         setParts(data.parts)
 //         setBrandName(data.brandName)
 //       } catch (error) {
@@ -385,7 +528,7 @@ export default SparePartsPage;
 //         setIsLoading(false)
 //       }
 //     }
-    
+
 //     fetchSpareParts()
 //   }, [modelName])
 
@@ -422,19 +565,19 @@ export default SparePartsPage;
 //   return (
 //     <div className="min-h-screen bg-gray-100">
 //       <PrivateNavbar />
-      
+
 //       <div className="container mx-auto px-4 py-12">
 //         <h1 className="text-3xl font-bold text-gray-800 mb-8">
 //           Spare Parts for {brandName}
 //         </h1>
-        
+
 //         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 //           {parts.map(part => (
 //             <div key={part.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
 //               <div className="relative">
-//                 <img 
-//                   src={part.image} 
-//                   alt={part.name} 
+//                 <img
+//                   src={part.image}
+//                   alt={part.name}
 //                   className="w-full h-48 object-cover cursor-pointer"
 //                   onClick={() => handleViewDetails(part.id)}
 //                 />
@@ -450,23 +593,23 @@ export default SparePartsPage;
 //                   )}
 //                 </button>
 //               </div>
-              
+
 //               <div className="p-4">
-//                 <h3 
+//                 <h3
 //                   className="text-lg font-semibold text-gray-800 mb-2 cursor-pointer hover:text-blue-600"
 //                   onClick={() => handleViewDetails(part.id)}
 //                 >
 //                   {part.name}
 //                 </h3>
 //                 <p className="text-gray-600 text-sm mb-3 line-clamp-2">{part.description}</p>
-                
+
 //                 <div className="flex justify-between items-center mb-3">
 //                   <span className="text-lg font-bold text-blue-600">${part.price.toFixed(2)}</span>
 //                   <span className={`text-sm ${part.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
 //                     {part.stock > 0 ? `${part.stock} in stock` : 'Out of stock'}
 //                   </span>
 //                 </div>
-                
+
 //                 <button
 //                   onClick={() => handleAddToCart(part)}
 //                   disabled={part.stock <= 0}
@@ -479,7 +622,7 @@ export default SparePartsPage;
 //             </div>
 //           ))}
 //         </div>
-        
+
 //         {parts.length === 0 && (
 //           <div className="text-center py-12">
 //             <p className="text-gray-600">No spare parts available for this brand.</p>
